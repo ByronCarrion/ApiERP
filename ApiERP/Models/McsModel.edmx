@@ -1,0 +1,481 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="dbInventModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tBodegas">
+          <Key>
+            <PropertyRef Name="CodBodega" />
+          </Key>
+          <Property Name="CodBodega" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NombreBodega" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="Referencia" Type="varchar" MaxLength="50" />
+          <Property Name="NoEnviarMsg" Type="bit" Nullable="false" />
+        </EntityType>
+        <!--Errores durante la generación:
+advertencia 6013: La tabla o vista 'dbInvent.dbo.tClasProducto' no tiene definida una clave principal y no es posible inferir ninguna clave principal válida. Esta tabla o vista se ha excluido. Para usar la entidad, necesitará revisar el esquema, agregar las claves correctas y quitar sus comentarios.
+        <EntityType Name="tClasProducto">
+          <Property Name="CLASE" Type="nchar" MaxLength="255" />
+          <Property Name="GRUPO" Type="nchar" MaxLength="255" />
+          <Property Name="SGRUPO" Type="nchar" MaxLength="255" />
+          <Property Name="CLASEDESCR" Type="nchar" MaxLength="255" />
+          <Property Name="GRUPODESCR" Type="nchar" MaxLength="255" />
+          <Property Name="SGRUPODESCR" Type="nchar" MaxLength="255" />
+        </EntityType>-->
+        <EntityType Name="tDepartamentos">
+          <Key>
+            <PropertyRef Name="idDepartamento" />
+          </Key>
+          <Property Name="idDepartamento" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NombreDepartamento" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="idDepartamentoPadre" Type="varchar" MaxLength="50" />
+          <Property Name="UsuarioAvisoRecepcion" Type="varchar" MaxLength="200" />
+        </EntityType>
+        <EntityType Name="tProductos">
+          <Key>
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="CodProducto" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="400" Nullable="false" />
+          <Property Name="UnidadMedida" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="PrecioMN" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="PrecioDolar" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="CantidadMinima" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="CantidadMaxima" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="CodigoSAC" Type="varchar" MaxLength="50" />
+          <Property Name="ClasificacionValor" Type="varchar" MaxLength="50" />
+          <Property Name="ClasificacionMovimiento" Type="varchar" MaxLength="50" />
+          <Property Name="CodSeccion" Type="int" />
+          <Property Name="CodDepartamento" Type="int" />
+          <Property Name="CodFamilia" Type="int" />
+          <Property Name="Ubicacion" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="tProductosCostos">
+          <Key>
+            <PropertyRef Name="idSecuencia" />
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="idSecuencia" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CodProducto" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ExistenciaActual" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="ExistenciaDisponible" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="CostoUltimaCompraMN" Type="decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="CostoUltimaCompraUS" Type="decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="TasadeCambioCompra" Type="decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="UltimaFechaCompra" Type="date" />
+          <Property Name="CostoPromedioMN" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="CostoPromedioUS" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="UltimaFechaPromedio" Type="date" />
+          <Property Name="AgregadoPor" Type="char" MaxLength="50" />
+          <Property Name="AgregadoEl" Type="datetime" />
+          <Property Name="AgregadoIP" Type="char" MaxLength="25" />
+          <Property Name="ActualizadoPor" Type="char" MaxLength="50" />
+          <Property Name="ActualizadoEL" Type="datetime" />
+          <Property Name="ActualizadoIP" Type="char" MaxLength="25" />
+        </EntityType>
+        <EntityType Name="tProductosExistencia">
+          <Key>
+            <PropertyRef Name="idExistencia" />
+          </Key>
+          <Property Name="idExistencia" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CodProducto" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CodBodega" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Ubicacion" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Existencia" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="Precio" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="LastUpdate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="tProductosInventario">
+          <Key>
+            <PropertyRef Name="CodBodega" />
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="CodBodega" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CodProducto" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ExistenciaActual" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="ExistenciaDisponible" Type="decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="FechaUltimoMovimiento" Type="date" />
+          <Property Name="TipoDocumento" Type="char" MaxLength="1" />
+          <Property Name="NumeroDocumento" Type="int" />
+        </EntityType>
+        <EntityType Name="tProveedores">
+          <Key>
+            <PropertyRef Name="idProveedor" />
+          </Key>
+          <Property Name="idProveedor" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CodigoProveedor" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NombreProveedor" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="Direccion" Type="text" Nullable="false" />
+          <Property Name="Ciudad" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Pais" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NumeroTributario" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Telefono" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Movil" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Fax" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="TipoProveedor" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ContactoNombre" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="ContactoEmail" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="ContactoTelefono" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="IdCondicion" Type="int" Nullable="false" />
+          <Property Name="AgregadoEl" Type="datetime" Nullable="false" />
+          <Property Name="AgregadoPor" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModificadoEl" Type="datetime" Nullable="false" />
+          <Property Name="ModificadoPor" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Status" Type="varchar" MaxLength="1" />
+        </EntityType>
+        <EntityType Name="tProveedoresCuentas">
+          <Key>
+            <PropertyRef Name="idProveedorCuenta" />
+          </Key>
+          <Property Name="idProveedorCuenta" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="idProveedor" Type="int" Nullable="false" />
+          <Property Name="CodBanco" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Cuenta" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NombreCuenta" Type="varchar" MaxLength="100" />
+          <Property Name="Referencia" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Instrucciones" Type="text" Nullable="false" />
+          <Property Name="deleted" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_tDepartamentos_tDepartamentos">
+          <End Role="tDepartamentos" Type="Self.tDepartamentos" Multiplicity="0..1" />
+          <End Role="tDepartamentos1" Type="Self.tDepartamentos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tDepartamentos">
+              <PropertyRef Name="idDepartamento" />
+            </Principal>
+            <Dependent Role="tDepartamentos1">
+              <PropertyRef Name="idDepartamentoPadre" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="dbInventModelStoreContainer">
+          <EntitySet Name="tBodegas" EntityType="Self.tBodegas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tDepartamentos" EntityType="Self.tDepartamentos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProductos" EntityType="Self.tProductos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProductosCostos" EntityType="Self.tProductosCostos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProductosExistencia" EntityType="Self.tProductosExistencia" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProductosInventario" EntityType="Self.tProductosInventario" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProveedores" EntityType="Self.tProveedores" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tProveedoresCuentas" EntityType="Self.tProveedoresCuentas" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_tDepartamentos_tDepartamentos" Association="Self.FK_tDepartamentos_tDepartamentos">
+            <End Role="tDepartamentos" EntitySet="tDepartamentos" />
+            <End Role="tDepartamentos1" EntitySet="tDepartamentos" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="dbInventModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="tBodegas">
+          <Key>
+            <PropertyRef Name="CodBodega" />
+          </Key>
+          <Property Name="CodBodega" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreBodega" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Referencia" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NoEnviarMsg" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tDepartamentos">
+          <Key>
+            <PropertyRef Name="idDepartamento" />
+          </Key>
+          <Property Name="idDepartamento" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreDepartamento" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="idDepartamentoPadre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="UsuarioAvisoRecepcion" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tDepartamentos1" Relationship="Self.FK_tDepartamentos_tDepartamentos" FromRole="tDepartamentos" ToRole="tDepartamentos1" />
+          <NavigationProperty Name="tDepartamentos2" Relationship="Self.FK_tDepartamentos_tDepartamentos" FromRole="tDepartamentos1" ToRole="tDepartamentos" />
+        </EntityType>
+        <EntityType Name="tProductos">
+          <Key>
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="CodProducto" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Descripcion" Type="String" MaxLength="400" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UnidadMedida" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PrecioMN" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="PrecioDolar" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CantidadMinima" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CantidadMaxima" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CodigoSAC" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ClasificacionValor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ClasificacionMovimiento" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CodSeccion" Type="Int32" />
+          <Property Name="CodDepartamento" Type="Int32" />
+          <Property Name="CodFamilia" Type="Int32" />
+          <Property Name="Ubicacion" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tProductosCostos">
+          <Key>
+            <PropertyRef Name="idSecuencia" />
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="idSecuencia" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CodProducto" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ExistenciaActual" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="ExistenciaDisponible" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="CostoUltimaCompraMN" Type="Decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="CostoUltimaCompraUS" Type="Decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="TasadeCambioCompra" Type="Decimal" Precision="21" Scale="6" Nullable="false" />
+          <Property Name="UltimaFechaCompra" Type="DateTime" Precision="0" />
+          <Property Name="CostoPromedioMN" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="CostoPromedioUS" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="UltimaFechaPromedio" Type="DateTime" Precision="0" />
+          <Property Name="AgregadoPor" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+          <Property Name="AgregadoEl" Type="DateTime" Precision="3" />
+          <Property Name="AgregadoIP" Type="String" MaxLength="25" FixedLength="true" Unicode="false" />
+          <Property Name="ActualizadoPor" Type="String" MaxLength="50" FixedLength="true" Unicode="false" />
+          <Property Name="ActualizadoEL" Type="DateTime" Precision="3" />
+          <Property Name="ActualizadoIP" Type="String" MaxLength="25" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tProductosExistencia">
+          <Key>
+            <PropertyRef Name="idExistencia" />
+          </Key>
+          <Property Name="idExistencia" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CodProducto" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CodBodega" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Ubicacion" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Existencia" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="Precio" Type="Decimal" Precision="18" Scale="4" />
+          <Property Name="LastUpdate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="tProductosInventario">
+          <Key>
+            <PropertyRef Name="CodBodega" />
+            <PropertyRef Name="CodProducto" />
+          </Key>
+          <Property Name="CodBodega" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CodProducto" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ExistenciaActual" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="ExistenciaDisponible" Type="Decimal" Precision="18" Scale="4" Nullable="false" />
+          <Property Name="FechaUltimoMovimiento" Type="DateTime" Precision="0" />
+          <Property Name="TipoDocumento" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="NumeroDocumento" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tProveedores">
+          <Key>
+            <PropertyRef Name="idProveedor" />
+          </Key>
+          <Property Name="idProveedor" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CodigoProveedor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreProveedor" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Direccion" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Ciudad" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Pais" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NumeroTributario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Telefono" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Movil" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Fax" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TipoProveedor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactoNombre" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactoEmail" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactoTelefono" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdCondicion" Type="Int32" Nullable="false" />
+          <Property Name="AgregadoEl" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="AgregadoPor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModificadoEl" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModificadoPor" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Status" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tProveedoresCuentas">
+          <Key>
+            <PropertyRef Name="idProveedorCuenta" />
+          </Key>
+          <Property Name="idProveedorCuenta" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="idProveedor" Type="Int32" Nullable="false" />
+          <Property Name="CodBanco" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Cuenta" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreCuenta" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Referencia" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Instrucciones" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="deleted" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_tDepartamentos_tDepartamentos">
+          <End Role="tDepartamentos" Type="Self.tDepartamentos" Multiplicity="0..1" />
+          <End Role="tDepartamentos1" Type="Self.tDepartamentos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tDepartamentos">
+              <PropertyRef Name="idDepartamento" />
+            </Principal>
+            <Dependent Role="tDepartamentos1">
+              <PropertyRef Name="idDepartamentoPadre" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="dbInventEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tBodegas" EntityType="Self.tBodegas" />
+          <EntitySet Name="tDepartamentos" EntityType="Self.tDepartamentos" />
+          <EntitySet Name="tProductos" EntityType="Self.tProductos" />
+          <EntitySet Name="tProductosCostos" EntityType="Self.tProductosCostos" />
+          <EntitySet Name="tProductosExistencia" EntityType="Self.tProductosExistencia" />
+          <EntitySet Name="tProductosInventario" EntityType="Self.tProductosInventario" />
+          <EntitySet Name="tProveedores" EntityType="Self.tProveedores" />
+          <EntitySet Name="tProveedoresCuentas" EntityType="Self.tProveedoresCuentas" />
+          <AssociationSet Name="FK_tDepartamentos_tDepartamentos" Association="Self.FK_tDepartamentos_tDepartamentos">
+            <End Role="tDepartamentos" EntitySet="tDepartamentos" />
+            <End Role="tDepartamentos1" EntitySet="tDepartamentos" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="dbInventModelStoreContainer" CdmEntityContainer="dbInventEntities">
+          <EntitySetMapping Name="tBodegas">
+            <EntityTypeMapping TypeName="dbInventModel.tBodegas">
+              <MappingFragment StoreEntitySet="tBodegas">
+                <ScalarProperty Name="CodBodega" ColumnName="CodBodega" />
+                <ScalarProperty Name="NombreBodega" ColumnName="NombreBodega" />
+                <ScalarProperty Name="Referencia" ColumnName="Referencia" />
+                <ScalarProperty Name="NoEnviarMsg" ColumnName="NoEnviarMsg" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tDepartamentos">
+            <EntityTypeMapping TypeName="dbInventModel.tDepartamentos">
+              <MappingFragment StoreEntitySet="tDepartamentos">
+                <ScalarProperty Name="idDepartamento" ColumnName="idDepartamento" />
+                <ScalarProperty Name="NombreDepartamento" ColumnName="NombreDepartamento" />
+                <ScalarProperty Name="idDepartamentoPadre" ColumnName="idDepartamentoPadre" />
+                <ScalarProperty Name="UsuarioAvisoRecepcion" ColumnName="UsuarioAvisoRecepcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProductos">
+            <EntityTypeMapping TypeName="dbInventModel.tProductos">
+              <MappingFragment StoreEntitySet="tProductos">
+                <ScalarProperty Name="CodProducto" ColumnName="CodProducto" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="UnidadMedida" ColumnName="UnidadMedida" />
+                <ScalarProperty Name="PrecioMN" ColumnName="PrecioMN" />
+                <ScalarProperty Name="PrecioDolar" ColumnName="PrecioDolar" />
+                <ScalarProperty Name="CantidadMinima" ColumnName="CantidadMinima" />
+                <ScalarProperty Name="CantidadMaxima" ColumnName="CantidadMaxima" />
+                <ScalarProperty Name="CodigoSAC" ColumnName="CodigoSAC" />
+                <ScalarProperty Name="ClasificacionValor" ColumnName="ClasificacionValor" />
+                <ScalarProperty Name="ClasificacionMovimiento" ColumnName="ClasificacionMovimiento" />
+                <ScalarProperty Name="CodSeccion" ColumnName="CodSeccion" />
+                <ScalarProperty Name="CodDepartamento" ColumnName="CodDepartamento" />
+                <ScalarProperty Name="CodFamilia" ColumnName="CodFamilia" />
+                <ScalarProperty Name="Ubicacion" ColumnName="Ubicacion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProductosCostos">
+            <EntityTypeMapping TypeName="dbInventModel.tProductosCostos">
+              <MappingFragment StoreEntitySet="tProductosCostos">
+                <ScalarProperty Name="idSecuencia" ColumnName="idSecuencia" />
+                <ScalarProperty Name="CodProducto" ColumnName="CodProducto" />
+                <ScalarProperty Name="ExistenciaActual" ColumnName="ExistenciaActual" />
+                <ScalarProperty Name="ExistenciaDisponible" ColumnName="ExistenciaDisponible" />
+                <ScalarProperty Name="CostoUltimaCompraMN" ColumnName="CostoUltimaCompraMN" />
+                <ScalarProperty Name="CostoUltimaCompraUS" ColumnName="CostoUltimaCompraUS" />
+                <ScalarProperty Name="TasadeCambioCompra" ColumnName="TasadeCambioCompra" />
+                <ScalarProperty Name="UltimaFechaCompra" ColumnName="UltimaFechaCompra" />
+                <ScalarProperty Name="CostoPromedioMN" ColumnName="CostoPromedioMN" />
+                <ScalarProperty Name="CostoPromedioUS" ColumnName="CostoPromedioUS" />
+                <ScalarProperty Name="UltimaFechaPromedio" ColumnName="UltimaFechaPromedio" />
+                <ScalarProperty Name="AgregadoPor" ColumnName="AgregadoPor" />
+                <ScalarProperty Name="AgregadoEl" ColumnName="AgregadoEl" />
+                <ScalarProperty Name="AgregadoIP" ColumnName="AgregadoIP" />
+                <ScalarProperty Name="ActualizadoPor" ColumnName="ActualizadoPor" />
+                <ScalarProperty Name="ActualizadoEL" ColumnName="ActualizadoEL" />
+                <ScalarProperty Name="ActualizadoIP" ColumnName="ActualizadoIP" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProductosExistencia">
+            <EntityTypeMapping TypeName="dbInventModel.tProductosExistencia">
+              <MappingFragment StoreEntitySet="tProductosExistencia">
+                <ScalarProperty Name="idExistencia" ColumnName="idExistencia" />
+                <ScalarProperty Name="CodProducto" ColumnName="CodProducto" />
+                <ScalarProperty Name="CodBodega" ColumnName="CodBodega" />
+                <ScalarProperty Name="Ubicacion" ColumnName="Ubicacion" />
+                <ScalarProperty Name="Existencia" ColumnName="Existencia" />
+                <ScalarProperty Name="Precio" ColumnName="Precio" />
+                <ScalarProperty Name="LastUpdate" ColumnName="LastUpdate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProductosInventario">
+            <EntityTypeMapping TypeName="dbInventModel.tProductosInventario">
+              <MappingFragment StoreEntitySet="tProductosInventario">
+                <ScalarProperty Name="CodBodega" ColumnName="CodBodega" />
+                <ScalarProperty Name="CodProducto" ColumnName="CodProducto" />
+                <ScalarProperty Name="ExistenciaActual" ColumnName="ExistenciaActual" />
+                <ScalarProperty Name="ExistenciaDisponible" ColumnName="ExistenciaDisponible" />
+                <ScalarProperty Name="FechaUltimoMovimiento" ColumnName="FechaUltimoMovimiento" />
+                <ScalarProperty Name="TipoDocumento" ColumnName="TipoDocumento" />
+                <ScalarProperty Name="NumeroDocumento" ColumnName="NumeroDocumento" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProveedores">
+            <EntityTypeMapping TypeName="dbInventModel.tProveedores">
+              <MappingFragment StoreEntitySet="tProveedores">
+                <ScalarProperty Name="idProveedor" ColumnName="idProveedor" />
+                <ScalarProperty Name="CodigoProveedor" ColumnName="CodigoProveedor" />
+                <ScalarProperty Name="NombreProveedor" ColumnName="NombreProveedor" />
+                <ScalarProperty Name="Direccion" ColumnName="Direccion" />
+                <ScalarProperty Name="Ciudad" ColumnName="Ciudad" />
+                <ScalarProperty Name="Pais" ColumnName="Pais" />
+                <ScalarProperty Name="NumeroTributario" ColumnName="NumeroTributario" />
+                <ScalarProperty Name="Telefono" ColumnName="Telefono" />
+                <ScalarProperty Name="Movil" ColumnName="Movil" />
+                <ScalarProperty Name="Fax" ColumnName="Fax" />
+                <ScalarProperty Name="TipoProveedor" ColumnName="TipoProveedor" />
+                <ScalarProperty Name="ContactoNombre" ColumnName="ContactoNombre" />
+                <ScalarProperty Name="ContactoEmail" ColumnName="ContactoEmail" />
+                <ScalarProperty Name="ContactoTelefono" ColumnName="ContactoTelefono" />
+                <ScalarProperty Name="IdCondicion" ColumnName="IdCondicion" />
+                <ScalarProperty Name="AgregadoEl" ColumnName="AgregadoEl" />
+                <ScalarProperty Name="AgregadoPor" ColumnName="AgregadoPor" />
+                <ScalarProperty Name="ModificadoEl" ColumnName="ModificadoEl" />
+                <ScalarProperty Name="ModificadoPor" ColumnName="ModificadoPor" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tProveedoresCuentas">
+            <EntityTypeMapping TypeName="dbInventModel.tProveedoresCuentas">
+              <MappingFragment StoreEntitySet="tProveedoresCuentas">
+                <ScalarProperty Name="idProveedorCuenta" ColumnName="idProveedorCuenta" />
+                <ScalarProperty Name="idProveedor" ColumnName="idProveedor" />
+                <ScalarProperty Name="CodBanco" ColumnName="CodBanco" />
+                <ScalarProperty Name="Cuenta" ColumnName="Cuenta" />
+                <ScalarProperty Name="NombreCuenta" ColumnName="NombreCuenta" />
+                <ScalarProperty Name="Referencia" ColumnName="Referencia" />
+                <ScalarProperty Name="Instrucciones" ColumnName="Instrucciones" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
