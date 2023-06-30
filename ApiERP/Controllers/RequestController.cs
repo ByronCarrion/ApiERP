@@ -308,7 +308,7 @@ namespace ApiERP.Controllers
         [HttpPost]
         [MethodGroup("Requisas")]
         [SwaggerResponseExample(HttpStatusCode.OK, typeof(RequisaExample))]
-        public IHttpActionResult update([FromBody] RequisaSiagri datos)
+        public async  Task<IHttpActionResult> update([FromBody] RequisaSiagri datos)
         {
             try
             {
@@ -357,7 +357,7 @@ namespace ApiERP.Controllers
                 catch (Exception ex)
                 {
                     MyLogger.GetInstance().Error("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                    return BadRequest("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
+                    return BadRequest("Error al Validar Detalle de Items de la Requisa: " + ex.StackTrace);
                 }
 
                 DataTable dt;
