@@ -1,6 +1,8 @@
 ﻿using ApiERP.Models;
 using ApiERP.Models.ModelExtensions;
 using ApiERP.Services;
+using ApiERP.Services.Utility;
+using Newtonsoft.Json;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -32,7 +34,7 @@ namespace ApiERP.Controllers
         {
             try
             {
-
+                MyLogger.GetInstance().Info("Llamado al Authenticate Controller. Authenticate method, Datos Recibidos: " + JsonConvert.SerializeObject(login));
                 if (login == null)
                     return BadRequest("Datos incorrectos");
 
@@ -68,12 +70,12 @@ namespace ApiERP.Controllers
                 _db.Entry(usuario).State = EntityState.Modified;
                 _db.SaveChanges();
 
-
+                MyLogger.GetInstance().Info("Saliendo de Authenticate Controller.");
                 return Ok(token);
             }
             catch (Exception e)
             {
-
+                MyLogger.GetInstance().Error("Error Exception Authenticate Controller: " + e.Message);
                 return BadRequest(e.Message.ToString());
             }
         }

@@ -308,7 +308,7 @@ namespace ApiERP.Controllers
         [HttpPost]
         [MethodGroup("Requisas")]
         [SwaggerResponseExample(HttpStatusCode.OK, typeof(RequisaExample))]
-        public async  Task<IHttpActionResult> update([FromBody] RequisaSiagri datos)
+        public async Task<IHttpActionResult> update([FromBody] RequisaSiagri datos)
         {
             try
             {
