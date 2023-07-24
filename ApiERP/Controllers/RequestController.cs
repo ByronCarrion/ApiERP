@@ -80,7 +80,7 @@ namespace ApiERP.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return BadRequest("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
+                    return BadRequest(" metodo 1 - Error al Validar Detalle de Items de la Requisa: " + ex.Message);
                 }
 
                 DataTable dt;
@@ -117,7 +117,7 @@ namespace ApiERP.Controllers
                 catch (Exception ex)
                 {
                     MyLogger.GetInstance().Error("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                    return BadRequest("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
+                    return BadRequest("metodo 2 - Error al Validar Detalle de Items de la Requisa: " + ex.Message);
                 }
                 //CONSULTA SI LA ACTIVIDAD SELECCIONADA EXISTE EN ERP
                 //dt = _db.ExecuteTable($"SELECT * FROM IBACTIVITYLOTE WHERE ACLOTIDCOMPANY = '{datos.REQCOMPANYID}' AND ACLOTCODEACTIVIDAD = {datos.REQACTIVITY};");
