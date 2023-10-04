@@ -4,6 +4,7 @@ using ApiERP.Services;
 using Swashbuckle.Examples;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 //using System.Net.Http;
@@ -21,6 +22,7 @@ namespace ApiERP.Controllers
     public class ArticlesController : ApiController
     {
         private dbInventEntities _db = new dbInventEntities();
+        private ConexionMySQL _dbMysql = new ConexionMySQL();
 
         /// <summary>
         /// Obtiene el listado de todos los productos
@@ -37,30 +39,9 @@ namespace ApiERP.Controllers
         {
             try
             {
-                var tipos = _db.Database.SqlQuery<tClasProducto>("Select DISTINCT RTRIM(LTRIM(CLASE)) + ' ' + RTRIM(LTRIM(GRUPO)) Codigo " +
-                                                " from tClasProducto where RTRIM(LTRIM(CLASE)) + ' ' + RTRIM(LTRIM(GRUPO)) is not null")
-                    .Select(x => x.Codigo)
-                    .ToList();
+                DataTable Saldos = _dbMysql.ExecuteTable("SELECT\nPRODCOD as codigo,\nPRODNAME as descripcion,\nUMNAME as UnidadMedida,\nSUBSTRING(PRODCOD,1,5) as tipo,\ncast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD ,CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV \nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\nWHERE SAINVIDCOMPANY = 3");
 
-                var prods = _db.tProductos
-                    .Join(_db.tProductosCostos,
-                           pe => pe.CodProducto,
-                           p => p.CodProducto,
-                           (pe, p) => new { PE = pe, P = p })
-                           .Where(x => x.PE.Descripcion.Length > 0 && !x.PE.Descripcion.Contains("NO USAR")
-                           && !x.PE.Descripcion.Contains("INHABILITADO")
-                           && tipos.Contains(x.PE.CodProducto.Substring(0, 5)))
-                                .Select(x => new
-                                {
-                                    Codigo = x.P.CodProducto,
-                                    Descripcion = x.PE.Descripcion.Substring(0, 39),
-                                    UnidadMedida = x.PE.UnidadMedida,
-                                    Tipo = x.P.CodProducto.Substring(0, 5),
-                                    CostoUSD = x.P.CostoPromedioUS,
-                                    FechaEstandar = x.P.UltimaFechaCompra
-                                }).Take(1);
-
-                return Ok(prods);
+                return Ok(Saldos);
             }
             catch (Exception e)
             {
@@ -115,51 +96,10 @@ namespace ApiERP.Controllers
         {
             try
             {
-                var existe = _db.tProductos.Where(x => x.CodProducto.Equals(producto)).Count();
-                var existeB = _db.tBodegas.Where(x => x.CodBodega.Equals(bodega)).Count();
-                var costo = _db.tProductosCostos.Where(x => x.CodProducto.Equals(producto)).Count();
-                var tieneRegistroInv = _db.tProductosInventario
-                                        .Where(x => x.CodProducto.Equals(producto) && x.CodBodega.Equals(bodega))
-                                        .Count();
 
-                if (existe == 0)
-                    return BadRequest("Código de Producto no existe");
+                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega,\r\nUMNAME as UnidadMedida,\r\nSAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible,\r\ncast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD,\r\nCAST( SAINVADDDATE AS CHAR) as  FechaEstandar\r\nFROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  PRODCOD = '" + producto + "' and BODEGAID = '"+bodega+"' and SAINVIDCOMPANY = 3");
 
-                if (existeB == 0)
-                    return BadRequest("Código de Bodega no existe");
-
-                if (tieneRegistroInv == 0)
-                    return BadRequest("Este producto no ha sido agregado al inventario");
-
-
-                if (costo == 0)
-                    return BadRequest("Este producto no tiene costo");
-
-                var stock = _db.tProductosInventario
-                            .Join(_db.tProductos,
-                            pe => pe.CodProducto,
-                            p => p.CodProducto,
-                            (pe, p) => new { PE = pe, P = p }
-                            )
-                            .Join(_db.tProductosCostos,
-                            tProductosInventario => tProductosInventario.PE.CodProducto,
-                            pc => pc.CodProducto,
-                            (pe, pc) => new { PC = pc, PE = pe, }
-                            )
-                            .Where(x => x.PE.P.CodProducto.Equals(producto) && x.PE.PE.CodBodega.Equals(x.PE.PE.CodBodega))
-
-                            .Select(x => new
-                            {
-                                CodProducto = x.PE.PE.CodProducto,
-                                CodBodega = x.PE.PE.CodBodega,
-                                UndMedida = x.PE.P.UnidadMedida,
-                                StockActual = x.PE.PE.ExistenciaActual,
-                                StockDisponible = x.PE.PE.ExistenciaDisponible,
-                                CostoUSD = x.PC.CostoPromedioUS,
-                                FechaEstandar = x.PC.UltimaFechaCompra
-                            });
-
-                return Ok(stock);
+                return Ok(Stock);
             }
             catch (Exception e)
             {
@@ -181,47 +121,9 @@ namespace ApiERP.Controllers
         {
             try
             {
-                /*
-                var stock = _db.tProductosInventario
-                            .Join(_db.tProductos,
-                            pe => pe.CodProducto,
-                            p => p.CodProducto,
-                            (pe, p) => new { PE = pe, P = p }
-                            )
-                            .Select(x => new
-                            {
-                                CodProducto = x.PE.CodProducto,
-                                CodBodega = x.PE.CodBodega,
-                                Descripcion = x.P.Descripcion,
-                                UndMedida = x.P.UnidadMedida,
-                                StockActual = x.PE.ExistenciaActual,
-                                StockDisponible = x.PE.ExistenciaDisponible
-                            });*/
+                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega , UMNAME as UnidadMedida, SAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible , cast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD ,\r\n CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  SAINVIDCOMPANY = 3");
 
-                var stock = _db.tProductosInventario
-                            .Join(_db.tProductos,
-                            pe => pe.CodProducto,
-                            p => p.CodProducto,
-                            (pe, p) => new { PE = pe, P = p }
-                            )
-                            .Join(_db.tProductosCostos,
-                            tProductosInventario => tProductosInventario.PE.CodProducto,
-                            pc => pc.CodProducto,
-                            (pe, pc) => new { PC = pc, PE = pe, }
-                            )
-                            .Select(x => new
-                            {
-                                CodProducto = x.PE.PE.CodProducto,
-                                CodBodega = x.PE.PE.CodBodega,
-                                UndMedida = x.PE.P.UnidadMedida,
-                                StockActual = x.PE.PE.ExistenciaActual,
-                                StockDisponible = x.PE.PE.ExistenciaDisponible,
-                                CostoUSD = x.PC.CostoPromedioUS,
-                                FechaEstandar = x.PC.UltimaFechaCompra
-                            });
-
-
-                return Ok(stock);
+                return Ok(Stock);
             }
             catch (Exception e)
             {

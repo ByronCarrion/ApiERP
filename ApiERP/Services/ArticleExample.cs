@@ -9,8 +9,7 @@ namespace ApiERP.Services
         public object GetExamples()
         {
             return new List<Object> {
-                new { Codigo = "01 01 01 0001", Descripcion = "Agroquímico", UnidadMedida = "KGS", Tipo = "01 01" },
-                new { Codigo = "01 02 02 0002", Descripcion = "Mouse inalámbrico", UnidadMedida = "UND", Tipo = "01 02"}
+                new { Codigo = "01 01 01 0001", Descripcion = "Agroquímico", UnidadMedida = "KGS", Tipo = "01 01", CostoUSD = 123.45 ,  FechaEstandar  = "2023-09-30 00:00:00" }
             };
         }
     }
@@ -31,7 +30,7 @@ namespace ApiERP.Services
         public object GetExamples()
         {
             return new List<Object> {
-                new { CodProducto = "01 01 01 0001", CodBodega = "001", UnidadMedida = "KGS", StockActual = 1235.25, StockDisponible = 1235.25 }
+                new { Codigo = "01 01 01 0001", CodBodega = 1, UnidadMedida = "KGS", StockActual = 1235.25, StockDisponible = 1235.25 ,CostoUSD = 123.45 , FechaEstandar  = "2023-09-30 00:00:00" }
             };
         }
     }
@@ -41,8 +40,7 @@ namespace ApiERP.Services
         public object GetExamples()
         {
             return new List<Object> {
-                new { CodProducto = "01 01 01 0001", CodBodega = "001", Descripcion = "Agroquímico", UnidadMedida = "KGS", StockActual = 1235.25, StockDisponible = 1235.25 },
-                new { CodProducto = "01 02 02 0002", CodBodega = "001", Descripcion = "Mouse Inalámbrico", UnidadMedida = "UND", StockActual = 25, StockDisponible = 23}
+                new { Codigo = "01 01 01 0001", CodBodega = 1 , UnidadMedida = "KGS", StockActual = 12.25, StockDisponible = 12.25 , CostoUSD = 1234.5 , FechaEstandar  = "2023-09-30 00:00:00" }
             };
         }
     }
