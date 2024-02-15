@@ -467,6 +467,7 @@ namespace ApiERP.Models.ModelExtensions
                 SpParameters[i].Value = ACTION;
 
                 MyLogger.GetInstance().Info("Requisa Clase. SP a Ejecutar: " + SpParameters.ToString());
+                
                 Answer = con.ExecuteSP(SpName, ref SpParameters);
                 MyLogger.GetInstance().Info("Requisa Clase. Repuesta Recibida: " + Answer);
                 return Answer;
