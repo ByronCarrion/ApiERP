@@ -98,6 +98,22 @@ namespace ApiERP.Controllers
                     claseID = dt.Rows[0]["ENTCLASSID"].ToString();
                 dt.Clear();
 
+                int QEMPID = 0;
+                String USERNAME = "";
+                if (datos.REQEMPID !=0 )
+                {
+                    dt = _db.ExecuteTable($"SELECT EYEMPID, EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        QEMPID = Int32.Parse(dt.Rows[0]["EYEMPID"].ToString());                      
+                    dt.Clear();
+
+                    dt = _db.ExecuteTable($"SELECT EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        USERNAME = dt.Rows[0]["EYUSERNAME"].ToString().ToUpper();
+                    dt.Clear();
+
+                }
+
                 /*
                 string CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
                 try
@@ -198,7 +214,7 @@ namespace ApiERP.Controllers
                 req.REQUISAID = 0;
                 req.REQREFNUM = datos.REQUISAID.ToString(); //Guardamos el idRequisa (Siagri) en NUMREF
                 req.REQBODEGAID = datos.REQBODEGAID;
-                req.REQEMPID = datos.REQEMPID;
+                req.REQEMPID = QEMPID;
                 req.REQUISASTATUS = datos.REQUISASTATUS.ToString();
                 req.REQGLID = IdCatalogo;
                 req.REQGL1 = Level1;
@@ -221,21 +237,21 @@ namespace ApiERP.Controllers
                 req.REQOT = datos.REQUISAID.ToString();
                 req.REQUISADATE = datos.REQUISADATE;
                 req.REQUISAFORDATE = datos.REQFORDATE;
-                req.REQMEMO = datos.REQMEMO;
+                req.REQMEMO = datos.REQMEMO.Substring(0, datos.REQMEMO.IndexOf("-")) + "-" + USERNAME;
                 req.REQTRIDCURR = 1;
                 req.REQCOIDCURR = 0;
                 req.REQBSIDCURR = 0;
                 req.REQEQUIPO = "";
-                req.REQADDWHO = datos.REQADDWHO;
+                req.REQADDWHO = USERNAME;
                 req.REQADDDATE = datos.REQADDDATE;
                 req.REQADDIP = datos.REQADDIP;
-                req.REQUPDWHO = datos.REQUPDWHO;
+                req.REQUPDWHO = USERNAME;
                 req.REQUPDDATE = datos.REQUPDDATE;
                 req.REQUPDIP = datos.REQUPDIP;
-                req.REQAPROBY = datos.REQAPROBY;
+                req.REQAPROBY = USERNAME;
                 req.REQAPRODATE = datos.REQAPRODATE;
                 req.REQAPROIP = datos.REQAPROIP;
-                req.REQCLOSEBY = datos.REQCLOSEBY;
+                req.REQCLOSEBY = USERNAME;
                 req.REQCLOSEDATE = datos.REQCLOSEDATE;
                 req.REQCLOSEIP = datos.REQCLOSEIP;
                 req.ACTION = "ADDREQUISA";
@@ -272,10 +288,10 @@ namespace ApiERP.Controllers
                         det.REQDETTRIDCURR = 1;
                         det.REQDETCOIDCURR = 0;
                         det.REQDETBSIDCURR = 0;
-                        det.REQDETADDWHO = item.REQDETADDWHO;
+                        det.REQDETADDWHO = USERNAME;
                         det.REQDETDDDATE = item.REQDETDDDATE;
                         det.REQDETADDIP = item.REQDETADDIP;
-                        det.REQDETCLOSEBY = item.REQDETCLOSEBY;
+                        det.REQDETCLOSEBY = USERNAME;
                         det.REQDETCLOSEDATE = item.REQDETCLOSEDATE;
                         det.REQDETCLOSEIP = item.REQDETCLOSEIP;
                         det.ACTION = "ADDDETAIL";
@@ -365,6 +381,22 @@ namespace ApiERP.Controllers
                 }
 
                 DataTable dt;
+
+                int QEMPID = 0;
+                String USERNAME = "";
+                if (datos.REQEMPID != 0)
+                {
+                    dt = _db.ExecuteTable($"SELECT EYEMPID, EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        QEMPID = Int32.Parse(dt.Rows[0]["EYEMPID"].ToString());
+                    dt.Clear();
+
+                    dt = _db.ExecuteTable($"SELECT EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        USERNAME = dt.Rows[0]["EYUSERNAME"].ToString().ToUpper();
+                    dt.Clear();
+
+                }
 
                 //INSERTAMOS EN EL ERP, EL JSON RECIBIDO.
                 dt = _db.ExecuteTable($"INSERT INTO IBLOGAPIS (LOGAPINAME,LOGAPICALL,LOGDOCUMENTID,LOGDATAJSON,LOGAPIADDWHO,LOGAPIADDDATE,LOGAPIADDIP) VALUES ('REQUISA','UPDATE','{datos.REQUISAID}','{JsonConvert.SerializeObject(datos)}','{datos.REQADDWHO}',NOW(),'{datos.REQADDIP}');");
@@ -510,7 +542,7 @@ namespace ApiERP.Controllers
                 req.REQUISAID = datos.REQUISAID;
                 req.REQREFNUM = datos.REQOT.ToString();
                 req.REQBODEGAID = datos.REQBODEGAID;
-                req.REQEMPID = datos.REQEMPID;
+                req.REQEMPID = QEMPID;
                 req.REQUISASTATUS = datos.REQUISASTATUS.ToString();
                 req.REQGLID = IdCatalogo;
                 req.REQGL1 = Level1;
@@ -537,21 +569,21 @@ namespace ApiERP.Controllers
                 req.REQOT = datos.REQOT.ToString();
                 req.REQUISADATE = datos.REQUISADATE;
                 req.REQUISAFORDATE = datos.REQFORDATE;
-                req.REQMEMO = datos.REQMEMO;
+                req.REQMEMO = datos.REQMEMO.Substring(0, datos.REQMEMO.IndexOf("-")) + "-" + USERNAME;
                 req.REQTRIDCURR = 1;
                 req.REQCOIDCURR = 0;
                 req.REQBSIDCURR = 0;
                 req.REQEQUIPO = "";
-                req.REQADDWHO = datos.REQADDWHO;
+                req.REQADDWHO = USERNAME;
                 req.REQADDDATE = datos.REQADDDATE;
                 req.REQADDIP = datos.REQADDIP;
-                req.REQUPDWHO = datos.REQUPDWHO;
+                req.REQUPDWHO = USERNAME;
                 req.REQUPDDATE = datos.REQUPDDATE;
                 req.REQUPDIP = datos.REQUPDIP;
-                req.REQAPROBY = datos.REQAPROBY;
+                req.REQAPROBY = USERNAME;
                 req.REQAPRODATE = datos.REQAPRODATE;
                 req.REQAPROIP = datos.REQAPROIP;
-                req.REQCLOSEBY = datos.REQCLOSEBY;
+                req.REQCLOSEBY = USERNAME;
                 req.REQCLOSEDATE = datos.REQCLOSEDATE;
                 req.REQCLOSEIP = datos.REQCLOSEIP;
                 req.ACTION = "UPDREQUISA";
@@ -786,6 +818,8 @@ namespace ApiERP.Controllers
 
                 DataTable dt;
 
+
+
                 //INSERTAMOS EN EL ERP, EL JSON RECIBIDO.
                 dt = _db.ExecuteTable($"INSERT INTO IBLOGAPIS (LOGAPINAME,LOGAPICALL,LOGDOCUMENTID,LOGDATAJSON,LOGAPIADDWHO,LOGAPIADDDATE,LOGAPIADDIP) VALUES ('REQUISA','ANULAR','{datos.REQUISAID}','{JsonConvert.SerializeObject(datos)}','{datos.REQADDWHO}',NOW(),'{datos.REQADDIP}');");
                 dt.Clear();
@@ -868,6 +902,8 @@ namespace ApiERP.Controllers
                 Decimal levelCC3 = 0;
                 Decimal levelCC4 = 0;
                 Decimal levelCC5 = 0;
+
+
                 if (datos.REQACTIVITY.Trim().Length > 0)
                 {
                     dt = _db.ExecuteTable($"SELECT COALESCE(ACLOTIDCC,'0.0.0.0.0') AS CentroCosto FROM IBACTIVITYLOTE WHERE ACLOTIDCOMPANY = '{datos.REQCOMPANYID}' AND ACLOTCODEACTIVIDAD='{datos.REQACTIVITY}';");
@@ -914,13 +950,28 @@ namespace ApiERP.Controllers
                     estatusRequisa = dt.Rows[0]["REQUISASTATUS"].ToString();
                 dt.Clear();
 
+                int QEMPID = 0;
+                String USERNAME = "";
+                if (datos.REQEMPID != 0)
+                {
+                    dt = _db.ExecuteTable($"SELECT EYEMPID, EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        QEMPID = Int32.Parse(dt.Rows[0]["EYEMPID"].ToString());
+                    dt.Clear();
+
+                    dt = _db.ExecuteTable($"SELECT EYUSERNAME FROM CM_CGP_ERP.IBPYEMPDT WHERE EYCOMPID = '{datos.REQCOMPANYID}' and EYIDSIAGRIEMP = '{datos.REQEMPID}';");
+                    if (dt.Rows.Count > 0)
+                        USERNAME = dt.Rows[0]["EYUSERNAME"].ToString().ToUpper();
+                    dt.Clear();
+
+                }
                 Requisas req = new Requisas();
 
                 req.REQCOMPANYID = datos.REQCOMPANYID; //PROVISIONAL PARA PRUEBA
                 req.REQUISAID = datos.REQUISAID;
                 req.REQREFNUM = datos.REQOT.ToString(); //Guardamos el idRequisa (Siagri) en NUMREF
                 req.REQBODEGAID = datos.REQBODEGAID;
-                req.REQEMPID = datos.REQEMPID;
+                req.REQEMPID = QEMPID;
                 req.REQUISASTATUS = "R";
                 req.REQGLID = IdCatalogo;
                 req.REQGL1 = Level1;
@@ -947,20 +998,20 @@ namespace ApiERP.Controllers
                 req.REQOT = datos.REQOT.ToString();
                 req.REQUISADATE = datos.REQUISADATE;
                 req.REQUISAFORDATE = datos.REQFORDATE;
-                req.REQMEMO = datos.REQMEMO;
+                req.REQMEMO = datos.REQMEMO.Substring(0, datos.REQMEMO.IndexOf("-")) + "-" + USERNAME;
                 req.REQTRIDCURR = 1;
                 req.REQCOIDCURR = 0;
                 req.REQBSIDCURR = 0;
-                req.REQADDWHO = datos.REQADDWHO;
+                req.REQADDWHO = USERNAME;
                 req.REQADDDATE = datos.REQADDDATE;
                 req.REQADDIP = datos.REQADDIP;
-                req.REQUPDWHO = datos.REQUPDWHO;
+                req.REQUPDWHO = USERNAME;
                 req.REQUPDDATE = datos.REQUPDDATE;
                 req.REQUPDIP = datos.REQUPDIP;
-                req.REQAPROBY = datos.REQAPROBY;
+                req.REQAPROBY = USERNAME;
                 req.REQAPRODATE = datos.REQAPRODATE;
                 req.REQAPROIP = datos.REQAPROIP;
-                req.REQCLOSEBY = datos.REQCLOSEBY;
+                req.REQCLOSEBY = USERNAME;
                 req.REQCLOSEDATE = datos.REQCLOSEDATE;
                 req.REQCLOSEIP = datos.REQCLOSEIP;
                 req.ACTION = "UPDREQUISA";

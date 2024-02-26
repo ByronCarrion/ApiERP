@@ -39,7 +39,7 @@ namespace ApiERP.Controllers
         {
             try
             {
-                DataTable Saldos = _dbMysql.ExecuteTable("SELECT\nPRODCOD as codigo,\nPRODNAME as descripcion,\nUMNAME as UnidadMedida,\nSUBSTRING(PRODCOD,1,5) as tipo,\ncast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD ,CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV \nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\nWHERE SAINVIDCOMPANY = 3");
+                DataTable Saldos = _dbMysql.ExecuteTable("SELECT PRODCOD as codigo, PRODNAME as descripcion,UMNAME as UnidadMedida,SUBSTRING(PRODCOD,1,5) as tipo,cast(SAINVCOSTAVG as decimal (16,2)) as CostoUSD ,CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV INNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP INNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY WHERE SAINVIDCOMPANY = 3");
 
                 return Ok(Saldos);
             }
@@ -97,7 +97,7 @@ namespace ApiERP.Controllers
             try
             {
 
-                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega,\r\nUMNAME as UnidadMedida,\r\nSAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible,\r\ncast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD,\r\nCAST( SAINVADDDATE AS CHAR) as  FechaEstandar\r\nFROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  PRODCOD = '" + producto + "' and BODEGAID = '"+bodega+"' and SAINVIDCOMPANY = 3");
+                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega,\r\nUMNAME as UnidadMedida,\r\nSAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible,\r\ncast(SAINVCOSTAVG as decimal (16,2)) as CostoUSD,\r\nCAST( SAINVADDDATE AS CHAR) as  FechaEstandar\r\nFROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  PRODCOD = '" + producto + "' and BODEGAID = '"+bodega+"' and SAINVIDCOMPANY = 3");
 
                 return Ok(Stock);
             }
@@ -121,7 +121,7 @@ namespace ApiERP.Controllers
         {
             try
             {
-                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega , UMNAME as UnidadMedida, SAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible , cast((SAINVCOSTAVG / 36.5) as decimal (16,2)) as CostoUSD ,\r\n CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  SAINVIDCOMPANY = 3");
+                DataTable Stock = _dbMysql.ExecuteTable("SELECT\r\nPRODCOD as Codigo,\r\nBODEGAID as CodBodega , UMNAME as UnidadMedida, SAINVSTCKACT as StockActual,\r\nSAINVSTCKACT as StockDisponible , cast(SAINVCOSTAVG as decimal (16,2)) as CostoUSD ,\r\n CAST( SAINVADDDATE AS CHAR) as  FechaEstandar FROM IBSALDOINV \r\nINNER JOIN IBPRODUCTO ON SAINVIDPROD = PRODID and SAINVIDCOMPANY = PRODIDCOMP\r\nINNER JOIN IBUNITMESAURE ON UMID = PRODIDUNIT and  UMCOMPID =  SAINVIDCOMPANY\r\nINNER JOIN IBBODEGA ON BODEGAID = SAINVIDWARH and  SAINVIDCOMPANY = BODCOMPANYID\r\nWHERE  SAINVIDCOMPANY = 3");
 
                 return Ok(Stock);
             }
