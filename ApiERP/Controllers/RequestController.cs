@@ -114,37 +114,7 @@ namespace ApiERP.Controllers
 
                 }
 
-                /*
-                string CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
-                try
-                {
-                    foreach (var item in datos.Detalle)
-                    {
-                        dt = _dbsql.ExecuteTable($"SELECT CodProducto,Descripcion FROM dbInvent.dbo.tProductos WHERE CodProducto = '{item.REQDETIDPRODMCS}';");
-                        if (dt.Rows.Count == 0)
-                            return BadRequest($"El producto {item.REQDETIDPRODMCS} no existe");
-                        dt.Clear();
-
-                        dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-                        if (dt.Rows.Count == 0)
-                            return BadRequest($"El producto {item.REQDETIDPRODMCS} no tiene inventario disponible en la bodega {datos.REQBODEGAID}");
-                        dt.Clear();
-                    }
-                }
-
-              
-                catch (Exception ex)
-                {
-                    MyLogger.GetInstance().Error("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                    return BadRequest("metodo 2 - Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                }
-                  */
-                //CONSULTA SI LA ACTIVIDAD SELECCIONADA EXISTE EN ERP
-                //dt = _db.ExecuteTable($"SELECT * FROM IBACTIVITYLOTE WHERE ACLOTIDCOMPANY = '{datos.REQCOMPANYID}' AND ACLOTCODEACTIVIDAD = {datos.REQACTIVITY};");
-                //if (dt.Rows.Count == 0)
-                //return BadRequest($"El código de Actividad: {datos.REQACTIVITY}, no existe en ERP");
-                //dt.Clear();
-
+         
                 //CUENTAS CONTABLES
                 int IdCatalogo = 0;
                 String Level1 = "000";
@@ -265,6 +235,7 @@ namespace ApiERP.Controllers
                     foreach (var item in datos.Detalle)
                     {
                       //  costo = 0;
+                      
                         det = new DetalleReq();
                         det.REQDETCOMPID = datos.REQCOMPANYID; //compañía de pruebas momentáneo
                         det.REQDETID = proximoId;
@@ -275,16 +246,8 @@ namespace ApiERP.Controllers
                         det.REQDETUMMCS = item.REQDETUMMCS;
                         det.REQDETMEMO = item.REQDETMEMO;
                         det.REQDETSTOCKORD = item.REQDETSTOCKORD;
-                        det.REQDETSTOCKGET = item.REQDETSTOCKGET;
-
-                        /*dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-                        if (dt.Rows.Count > 0)
-                            costo = double.Parse(dt.Rows[0]["COSTO"].ToString());
-                        dt.Clear();
-                        
-                        det.REQDETCOSTTRAN = costo > 0 ? costo : item.REQDETCOSTTRAN;
-                        */
-                        det.REQDETCOSTTRAN = item.REQDETCOSTTRAN;
+                        det.REQDETSTOCKGET = item.REQDETSTOCKORD;
+                        det.REQDETCOSTTRAN = item.REQDETCOSTTRAN;                        
                         det.REQDETTRIDCURR = 1;
                         det.REQDETCOIDCURR = 0;
                         det.REQDETBSIDCURR = 0;
@@ -408,7 +371,7 @@ namespace ApiERP.Controllers
                 dt.Clear();
 
                 //VALIDAMOS POR CADA ITEM, QUE EXISTA EL ITEM Y TENGA EXISTENCIA
-               // string CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
+                // string CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
                 string CodBodega = datos.REQBODEGAID.ToString();
                 try
                 {
@@ -524,18 +487,22 @@ namespace ApiERP.Controllers
                     Level5 = "000";
                     Level6 = "000";
                 }
-
+                
                 //VERIFICAMOS QUE LA REQUISA AUN ESTE EN ESTATUS BORRADOR, PARA QUE SE PUEDA PROCEDER A ACTUALIZAR.
                 dt = _db.ExecuteTable($"SELECT REQUISAID FROM IBBODREQUISA WHERE REQCOMPANYID='{datos.REQCOMPANYID}' AND REQUISAID='{datos.REQUISAID}' AND REQUISASTATUS='B' ;");
                 int existeRequisa = 0;
+                //VERIFICAMOS QUE LA REQUISA AUN ESTE EN ESTATUS BORRADO O CERRRAD0/DESPACHADO, PARA QUE SE PUEDA PROCEDER A ACTUALIZAR.
+                dt = _db.ExecuteTable($"SELECT REQUISAID FROM IBBODREQUISA WHERE REQCOMPANYID='{datos.REQCOMPANYID}' AND REQUISAID='{datos.REQUISAID}' AND REQUISASTATUS IN('B','C') ;");
                 if (dt.Rows.Count > 0)
-                    existeRequisa = int.Parse(dt.Rows[0]["REQUISAID"].ToString());
-                dt.Clear();
-
-                if (existeRequisa == 0)
+                {
+                    existeRequisa = Int32.Parse(dt.Rows[0]["REQUISAID"].ToString());
+                    dt.Clear();
+                }
+                if (existeRequisa <= 0)
+                {
                     MyLogger.GetInstance().Error($"RequestController. Update method, Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
-               return    BadRequest($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
-
+                    return BadRequest($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
+                }
                 Requisas req = new Requisas();
 
                 req.REQCOMPANYID = datos.REQCOMPANYID;
@@ -555,11 +522,7 @@ namespace ApiERP.Controllers
                 req.REQCCID2 = levelCC2;
                 req.REQCCID3 = levelCC3;
                 req.REQCCID4 = levelCC4;
-                req.REQCCID5 = levelCC5;
-                //COMPAÑIA 3, GERENCIA AGRICOLA ID = 3, Departamento de Produccion = 9;
-                //COMPAÑIA 2, GERENCIA AGRICOLA ID = 4, Departamento de Produccion = 4;
-                //req.REQTOPMNGRID = datos.REQTOPMNGRID;
-                //req.REQCOMPSCTID = datos.REQCOMPSCTID;
+                req.REQCCID5 = levelCC5;              
                 req.REQTOPMNGRID = datos.REQCOMPANYID == 3 ? 3 : 4;//ID GERENCIA
                 req.REQCOMPSCTID = datos.REQCOMPANYID == 3 ? 9 : 4;//ID DEPARTAMENTO
                 req.REQSECTIONID = 0; //DEPARTAMENTO DE MCS
@@ -588,163 +551,51 @@ namespace ApiERP.Controllers
                 req.REQCLOSEIP = datos.REQCLOSEIP;
                 req.ACTION = "UPDREQUISA";
                 req.REQPROC = "SIA";
-                MyLogger.GetInstance().Info("RequestController. Update method, Datos Antes de Actualizar Encabezado Requisa: " + req.ToString());
-               
-                /*
-                 if (req.Insert())
+
+                if (req.Insert())
                 {
                     DetalleReq det;
                     int i = 1;
-                    double costo = 0;
+                    //  double costo = 0;
                     foreach (var item in datos.Detalle)
                     {
-                        //INSERTAMOS DETALLE DE LA REQUISA AL ERP.
-                        try
-                        {
-                            costo = 0;
-                            det = new DetalleReq();
-                            det.REQDETCOMPID = datos.REQCOMPANYID; //compañía de pruebas momentáneo
-                            det.REQDETID = datos.REQUISAID;
-                            det.REQDETIDLIN = i;
-                            det.REQDETIDPROD = 0;
-                            det.REQDETIDPRODMCS = item.REQDETIDPRODMCS;
-                            det.REQDETPRODDESC = item.REQDETPRODDESC;
-                            det.REQDETUMMCS = item.REQDETUMMCS;
-                            det.REQDETMEMO = item.REQDETMEMO;
-                            det.REQDETSTOCKORD = item.REQDETSTOCKORD;
-                            det.REQDETSTOCKGET = item.REQDETSTOCKGET;
-                            dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-                            if (dt.Rows.Count > 0)
-                                costo = double.Parse(dt.Rows[0]["COSTO"].ToString());
-                            dt.Clear();
-                            det.REQDETCOSTTRAN = costo > 0 ? costo : item.REQDETCOSTTRAN;
-                            det.REQDETTRIDCURR = 1;
-                            det.REQDETCOIDCURR = 0;
-                            det.REQDETBSIDCURR = 0;
-                            det.REQDETADDWHO = item.REQDETADDWHO;
-                            det.REQDETDDDATE = item.REQDETDDDATE;
-                            det.REQDETADDIP = item.REQDETADDIP;
-                            det.REQDETCLOSEBY = item.REQDETCLOSEBY;
-                            det.REQDETCLOSEDATE = item.REQDETCLOSEDATE;
-                            det.REQDETCLOSEIP = item.REQDETCLOSEIP;
-                            det.ACTION = "ADDDETAIL";
-                            MyLogger.GetInstance().Info("RequestController. Update method, Datos Antes de Insertar Detalle Requisa: " + det.ToString());
-                            det.Insert();
-                        }
-                        catch (Exception e)
-                        {
-                            return BadRequest($"Error al Insertar detalle de Requisa del ERP: " + e.Message.ToString());
-                        }//INSERTADO DE DETALLE AL ERP
+                        //  costo = 0;
+
+                        det = new DetalleReq();
+                        det.REQDETCOMPID = datos.REQCOMPANYID; //compañía de pruebas momentáneo
+                        det.REQDETID = datos.REQUISAID;
+                        det.REQDETIDLIN = i;
+                        det.REQDETIDPROD = 0;
+                        det.REQDETIDPRODMCS = item.REQDETIDPRODMCS;
+                        det.REQDETPRODDESC = item.REQDETPRODDESC;
+                        det.REQDETUMMCS = item.REQDETUMMCS;
+                        det.REQDETMEMO = item.REQDETMEMO;
+                        det.REQDETSTOCKORD = item.REQDETSTOCKORD;
+                        det.REQDETSTOCKGET = item.REQDETSTOCKORD;
+                        det.REQDETCOSTTRAN = item.REQDETCOSTTRAN;
+                        det.REQDETTRIDCURR = 1;
+                        det.REQDETCOIDCURR = 0;
+                        det.REQDETBSIDCURR = 0;
+                        det.REQDETADDWHO = USERNAME;
+                        det.REQDETDDDATE = item.REQDETDDDATE;
+                        det.REQDETADDIP = item.REQDETADDIP;
+                        det.REQDETCLOSEBY = USERNAME;
+                        det.REQDETCLOSEDATE = item.REQDETCLOSEDATE;
+                        det.REQDETCLOSEIP = item.REQDETCLOSEIP;
+                        det.ACTION = "ADDDETAIL";
+                        det.Insert();
                         i++;
                     }
-                    
-
-                    //INSERTAMOS LA REQUISA AL MCS, SOLO CUANDO ESTE YA SEA DESPACHADO.
-                    RequisaInsertHeadToMCS requisaHeadMCS;
-                    RequisaInsertDetailToMCS requisaDetailMCS;
-                    try
-                    {
-                        if (datos.REQUISASTATUS.Equals("C"))
-                        {
-                            //RECUPERAMOS ULTIMO ID ANTES DE INSERTAR EL ENCABEZADO DE LA REQUISA.
-                            int lastIdRequisa = 0;
-                            int proximoIdRequisa = 0;
-                            //VERIFICAMOS EL ULTIMO ID DE REQUISA INSERTADO
-                            dt = _dbsql.ExecuteTable($"SELECT TOP (1) IdRequisa FROM dbo.tRequisas ORDER BY IdRequisa DESC;");
-                            if (dt.Rows.Count > 0)
-                                lastIdRequisa = int.Parse(dt.Rows[0]["IdRequisa"].ToString());
-                            dt.Clear();
-                            //INSERTAMOS EL ENCABEZADO PRIMERO
-                            requisaHeadMCS = new RequisaInsertHeadToMCS
-                            {
-                                Fecha = datos.REQUISADATE,
-                                CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString(),
-                                Uso = datos.REQMEMO,
-                                Departamento = "000",
-                                EntregarA = entregarA,
-                                CodSeccion = "000",
-                                CtaContable = "17",
-                                CentroCosto = centroCostoMCS,
-                                iActivityOT = "",
-                                Finca = datos.REQCLASSID.ToString(),
-                                Lote = datos.REQLOT,
-                                Equipo = "",
-                                Actividad = datos.REQACTIVITY,
-                                InternalCode = "ER",
-                                Estado = "1",
-                                CreadoPor = datos.REQADDWHO,
-                                CreadoEl = datos.REQADDDATE
-                            };
-                            if (requisaHeadMCS.InsertaRequisaMCS())
-                            {
-                                //VERIFICAMOS EL ULTIMO ID DE REQUISA INSERTADO
-                                dt = _dbsql.ExecuteTable($"SELECT TOP (1) IdRequisa FROM dbo.tRequisas ORDER BY IdRequisa DESC;");
-                                if (dt.Rows.Count > 0)
-                                    proximoIdRequisa = int.Parse(dt.Rows[0]["IdRequisa"].ToString());
-                                dt.Clear();
-                                //SI SE GENERO LA REQUISA, PROCEDEMOS A INSERTAR EL DETALLE DE LA MISMA.
-                                if (proximoIdRequisa > lastIdRequisa)
-                                {
-                                    i = 1;
-                                    double costoMCS = 0;
-                                    foreach (var item in datos.Detalle)
-                                    {
-                                        try
-                                        {
-                                            costoMCS = 0;
-                                            requisaDetailMCS = new RequisaInsertDetailToMCS();
-                                            requisaDetailMCS.IdRequisa = proximoIdRequisa;
-                                            requisaDetailMCS.Producto = item.REQDETIDPRODMCS;
-                                            requisaDetailMCS.CantSolicitada = item.REQDETSTOCKORD;
-                                            requisaDetailMCS.CantDespachada = item.REQDETSTOCKGET;
-                                            requisaDetailMCS.Ubicacion = "";
-                                            requisaDetailMCS.Estado = "0";
-                                            requisaDetailMCS.ProDescripcion = item.REQDETPRODDESC;
-                                            requisaDetailMCS.ProUM = item.REQDETUMMCS;
-                                            dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-                                            if (dt.Rows.Count > 0)
-                                                costoMCS = double.Parse(dt.Rows[0]["COSTO"].ToString());
-                                            dt.Clear();
-                                            requisaDetailMCS.ProCostoUnitario = costoMCS > 0 ? costoMCS : item.REQDETCOSTTRAN;
-                                            requisaDetailMCS.InsertaRequisaDetailMCS();
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            MyLogger.GetInstance().Info("RequestController. Update method, Error al Insertar Detalle de Requisa al MCS: " + e.Message);
-                                        }//INSERTADO DE DETALLE AL MCS
-                                        i++;
-                                    }//FIN DE FOR, PARA INSERTAR EL DETALLE DE LA REQUISA AL MCS.
-
-                                    //PROCEDER A ACTUALIZAR EL ESTATUS DE LA REQUISA PARA QUE SE APLIQUE EN EL MCS.
-                                    dt = _dbsql.ExecuteTable($"UPDATE dbo.tRequisas SET Estado='4',AutorizadoPor='{datos.REQAPROBY}',AutorizadoEl=getdate(),Despachador='{datos.REQCLOSEBY}',EntregadoEl=getdate()  WHERE IdRequisa='{proximoIdRequisa}'");
-                                    dt.Clear();
-
-                                    //PROCEDER A ACTUALIZAR EL ID REQUISA DE MCS, EN EL ERP.
-                                    dt = _db.ExecuteTable($"UPDATE IBBODREQUISA SET REQIDMCS='{proximoIdRequisa}' WHERE REQCOMPANYID='{datos.REQCOMPANYID}' AND REQUISAID='{datos.REQUISAID}';");
-                                    dt.Clear();
-                                }
-                            }//FIN DE IF PARA INSERTAR ENCABEZADO Y DETALLE DE REQUISA AL MCS
-
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MyLogger.GetInstance().Error("RequestController. Update method, Error al Insertar Encabezado y Detalle de Requisa al MCS: " + e.Message);
-                        return BadRequest($"Error al Insertar detalle de Requisa del ERP: " + e.Message.ToString());
-                    }//INSERTADO DE REQUISA ENCABEZADO Y DETALLE AL MCS
-                    
                 }
                 else
-                    MyLogger.GetInstance().Error($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}");
-               */
-
-                BadRequest($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}");
+                    BadRequest("Error al Actualizar la cabecera de la requisa");
                 var response = new
-                {
-                    IdRequisaERP = datos.REQUISAID,
-                    Mensaje = $"Requisa actualizada correctamente, Requisa ID: {datos.REQUISAID}"
+                {                  
+                    Mensaje = "Requisa Actualizada correctamente"
                 };
                 return Ok(response);
+
+               
             }
             catch (Exception e)
             {
@@ -831,26 +682,7 @@ namespace ApiERP.Controllers
                 dt.Clear();
                 //VALIDAMOS POR CADA ITEM, QUE EXISTA EL ITEM Y TENGA EXISTENCIA
                 string CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
-                /*try
-                {
-                    foreach (var item in datos.Detalle)
-                    {
-                        dt = _dbsql.ExecuteTable($"SELECT CodProducto,Descripcion FROM dbInvent.dbo.tProductos WHERE CodProducto = '{item.REQDETIDPRODMCS}';");
-                        if (dt.Rows.Count == 0)
-                            return BadRequest($"El producto {item.REQDETIDPRODMCS} no existe");
-                        dt.Clear();
-
-                        dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-                        if (dt.Rows.Count == 0)
-                            return BadRequest($"El producto {item.REQDETIDPRODMCS} no tiene inventario disponible en la bodega {datos.REQBODEGAID}");
-                        dt.Clear();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MyLogger.GetInstance().Error("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                    return BadRequest("Error al Validar Detalle de Items de la Requisa: " + ex.Message);
-                }*/
+            
 
                 //CONSULTA SI LA FINCA SELECCIONADA EXISTE EN ERP
                 String claseID = "0";
@@ -932,17 +764,19 @@ namespace ApiERP.Controllers
                     idRequisaMCS = int.Parse(dt.Rows[0]["REQIDMCS"].ToString());
                 dt.Clear();
 
+                int existeRequisa = 0;
                 //VERIFICAMOS QUE LA REQUISA AUN ESTE EN ESTATUS BORRADO O CERRRAD0/DESPACHADO, PARA QUE SE PUEDA PROCEDER A ACTUALIZAR.
                 dt = _db.ExecuteTable($"SELECT REQUISAID FROM IBBODREQUISA WHERE REQCOMPANYID='{datos.REQCOMPANYID}' AND REQUISAID='{datos.REQUISAID}' AND REQUISASTATUS IN('B','C') ;");
-                int existeRequisa = 0;
                 if (dt.Rows.Count > 0)
-                    existeRequisa = int.Parse(dt.Rows[0]["REQUISAID"].ToString());
-                dt.Clear();
-
-                if (existeRequisa == 0)
+                {
+                    existeRequisa = Int32.Parse(dt.Rows[0]["REQUISAID"].ToString());
+                    dt.Clear();
+                }
+                if (existeRequisa <= 0)
+                {
                     MyLogger.GetInstance().Error($"RequestController. Update method, Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
-                return BadRequest($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
-
+                    return BadRequest($"Error al actualizar los datos de la Requisa ID: {datos.REQUISAID}, el Estatus Actual de la Requisa no lo permite.");
+                }
                 //RECUPERAMOS EL ESTATUS ACTUAL DE LA REQUISA, PARA SABER SI FUE DESPACHADA, Y MANDAR A APLICAR UN AJUSTE AL MCS.
                 dt = _db.ExecuteTable($"SELECT REQUISASTATUS FROM IBBODREQUISA WHERE REQCOMPANYID='{datos.REQCOMPANYID}' AND REQUISAID='{datos.REQUISAID}';");
                 String estatusRequisa = "";
@@ -984,11 +818,7 @@ namespace ApiERP.Controllers
                 req.REQCCID2 = levelCC2;
                 req.REQCCID3 = levelCC3;
                 req.REQCCID4 = levelCC4;
-                req.REQCCID5 = levelCC5;
-                //COMPAÑIA 3, GERENCIA AGRICOLA ID = 3, Departamento de Produccion = 9;
-                //COMPAÑIA 2, GERENCIA AGRICOLA ID = 4, Departamento de Produccion = 4;
-                //req.REQTOPMNGRID = datos.REQTOPMNGRID;
-                //req.REQCOMPSCTID = datos.REQCOMPSCTID;
+                req.REQCCID5 = levelCC5;              
                 req.REQTOPMNGRID = datos.REQCOMPANYID == 3 ? 3 : 4;//ID GERENCIA
                 req.REQCOMPSCTID = datos.REQCOMPANYID == 3 ? 9 : 4;//ID DEPARTAMENTO
                 req.REQSECTIONID = 0; //DEPARTAMENTO DE MCS
@@ -1016,100 +846,9 @@ namespace ApiERP.Controllers
                 req.REQCLOSEIP = datos.REQCLOSEIP;
                 req.ACTION = "UPDREQUISA";
                 req.REQPROC = "SIA";
+                req.Insert();
 
-                return Ok($"Requisa Anulada Correctamente.");
-                /*
-            if (req.Insert())
-            {
-
-                //MANDAMOS A ACTUALIZAR EL ESTADO DE LA REQUISA EN EL MCS, Estado 3=Rechazado, 9=Eliminado/Anulada.
-                /*if (idRequisaMCS > 0)
-                {
-                    dt = _dbsql.ExecuteTable($"UPDATE dbo.tRequisas SET Estado='9', RazonRechazo='Requisa Anulada Por Siagri'  WHERE IdRequisa='{idRequisaMCS}'");
-                    dt.Clear();
-                }*/
-
-
-            //    DetalleReq det;
-            //        RequisaSiagriAnulacionToMCS detAnula;
-            //        int i = 1;
-            //        double costo = 0;
-            //        double costoMCS = 0;
-            //        foreach (var item in datos.Detalle)
-            //        {
-            //            try
-            //            {
-            //                det = new DetalleReq();
-            //                det.REQDETCOMPID = datos.REQCOMPANYID; //compañía de pruebas momentáneo
-            //                det.REQDETID = datos.REQUISAID;
-            //                det.REQDETIDLIN = i;
-            //                det.REQDETIDPROD = 0;
-            //                det.REQDETIDPRODMCS = item.REQDETIDPRODMCS;
-            //                det.REQDETPRODDESC = item.REQDETPRODDESC;
-            //                det.REQDETUMMCS = item.REQDETUMMCS;
-            //                det.REQDETMEMO = item.REQDETMEMO;
-            //                det.REQDETSTOCKORD = item.REQDETSTOCKORD;
-            //                det.REQDETSTOCKGET = item.REQDETSTOCKGET;
-            //                dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-            //                if (dt.Rows.Count > 0)
-            //                    costo = double.Parse(dt.Rows[0]["COSTO"].ToString());
-            //                dt.Clear();
-            //                det.REQDETCOSTTRAN = costo > 0 ? costo : item.REQDETCOSTTRAN;
-            //                det.REQDETTRIDCURR = 1;
-            //                det.REQDETCOIDCURR = 0;
-            //                det.REQDETBSIDCURR = 0;
-            //                det.REQDETADDWHO = item.REQDETADDWHO;
-            //                det.REQDETDDDATE = item.REQDETDDDATE;
-            //                det.REQDETADDIP = item.REQDETADDIP;
-            //                det.REQDETCLOSEBY = item.REQDETCLOSEBY;
-            //                det.REQDETCLOSEDATE = item.REQDETCLOSEDATE;
-            //                det.REQDETCLOSEIP = item.REQDETCLOSEIP;
-            //                det.ACTION = "ADDDETAIL";
-            //                det.Insert();
-            //            }
-            //            catch (Exception e)
-            //            {
-            //                return BadRequest($"Error al anular detalle de Requisa del ERP: " + e.Message.ToString());
-            //            }
-
-            //            try
-            //            {
-            //                //SI EL ESTATUS ACTUAL DE LA REQUISA ES 'C':CERRADO/DESPACHADO, SE MANDA A HACER EL AJUSTE AL MCS PARA ANULAR REQUISA.
-            //                if (estatusRequisa.Equals("C"))
-            //                {
-            //                    costoMCS = 0;
-            //                    detAnula = new RequisaSiagriAnulacionToMCS();
-            //                    detAnula.CodProducto = item.REQDETIDPRODMCS;
-            //                    detAnula.CodBodega = datos.REQBODEGAID < 10 ? "00" + datos.REQBODEGAID.ToString() : "0" + datos.REQBODEGAID.ToString();
-            //                    detAnula.Cantidad = item.REQDETSTOCKGET;
-            //                    detAnula.Notas = "Ajuste Positivo, Por Anulacion de Requisa de ERP ID: " + datos.REQUISAID.ToString() + ", Siagri ID: " + datos.REQOT.ToString();
-            //                    detAnula.Estado = "0";
-            //                    detAnula.AgregadoPor = item.REQDETADDWHO;
-            //                    detAnula.AgregadoEl = item.REQDETDDDATE;
-            //                    detAnula.AutorizadoPor = item.REQDETCLOSEBY;
-            //                    detAnula.AutorizadoEl = item.REQDETCLOSEDATE;
-            //                    detAnula.AutorizadoNotas = "SIAGRI";
-            //                    dt = _dbsql.ExecuteTable($"SELECT PR.CodProducto AS CodProducto,PR.Descripcion AS Descripcion,PI.ExistenciaActual AS EXISTENCIA,PC.CostoPromedioMN AS COSTO,PR.UnidadMedida AS UM,PI.CodBodega AS Bodega FROM dbInvent.dbo.tProductos PR INNER JOIN dbInvent.dbo.tProductosCostos PC ON (PR.CodProducto = PC.CodProducto)  INNER JOIN dbInvent.dbo.tProductosInventario PI ON (PR.CodProducto = PI.CodProducto)  WHERE PI.CodBodega = '{CodBodega}' AND PI.ExistenciaActual >= 0 AND PC.ExistenciaActual>0 AND PC.CostoPromedioMN>0 AND PR.CodProducto = '{item.REQDETIDPRODMCS}';");
-            //                    if (dt.Rows.Count > 0)
-            //                        costoMCS = double.Parse(dt.Rows[0]["COSTO"].ToString());
-            //                    dt.Clear();
-            //                    detAnula.ProCostoUnitario = costoMCS > 0 ? costoMCS : item.REQDETCOSTTRAN;
-            //                    detAnula.InsertAjuste();
-            //                }
-            //            }
-            //            catch (Exception e)
-            //            {
-            //                return BadRequest($"Error al Insertar Ajuste al MCS, para anular requisa: " + e.Message.ToString());
-            //            }
-
-            //            i++;
-            //        }
-            //    }
-            //    else
-            //        BadRequest($"Error al Anular los datos de la Requisa ID: {datos.REQUISAID}");
-
-            //    return Ok($"Requisa Anulada Correctamente."); 
-            //*/
+                return Ok($"Requisa Anulada Correctamente.");             
             }
             catch (Exception e)
             {
